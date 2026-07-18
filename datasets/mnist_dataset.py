@@ -1,0 +1,66 @@
+import os
+
+import cv2
+import numpy as np
+import struct
+from array import array
+import torch
+from torch.utils.data import Dataset
+from torchvision import transforms
+
+TRAIN_IMAGES_FILENAME = 'train-images.idx3-ubyte'
+TEST_IMAGES_FILENAME = 't10k-images.idx3-ubyte'
+TRAIN_LABELS_FILENAME = 'train-labels.idx1-ubyte'
+TEST_LABELS_FILENAME = 't10k-labels.idx1-ubyte'
+
+class MnistDataset(Dataset):
+    def __init__(self, root_dir: str, is_train: bool):
+        self.images = []
+        self.labels = []
+        self.images_filepath = os.path.join(root_dir, TRAIN_IMAGES_FILENAME if is_train else TEST_IMAGES_FILENAME)
+        self.labels_filepath = os.path.join(root_dir, TRAIN_LABELS_FILENAME if is_train else TEST_LABELS_FILENAME)
+        self.load()
+        self.augs = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.RandomHorizontalFlip(),
+            transforms.Resize((224, 224))]
+        )
+
+    def __len__(self):
+        return len(self.images)
+
+    def load(self):
+        self.images, self.labels = self.read_images_labels(self.images_filepath, self.labels_filepath)
+
+    def __getitem__(self, index):
+        image = cv2.cvtColor(self.images[index], cv2.COLOR_GRAY2RGB)
+        # image = torch.from_numpy(np.transpose(image, (2, 0, 1))).float()
+        image = self.augs(image)
+        label = self.labels[index]
+        batch = {'image': image,
+                 'label': torch.tensor(label).long()}
+        return batch
+
+    @staticmethod
+    def read_images_labels(images_filepath, labels_filepath):
+        labels = []
+        with open(labels_filepath, 'rb') as file:
+            magic, size = struct.unpack(">II", file.read(8))
+            if magic != 2049:
+                raise ValueError('Magic number mismatch, expected 2049, got {}'.format(magic))
+            labels = array("B", file.read())
+
+        with open(images_filepath, 'rb') as file:
+            magic, size, rows, cols = struct.unpack(">IIII", file.read(16))
+            if magic != 2051:
+                raise ValueError('Magic number mismatch, expected 2051, got {}'.format(magic))
+            image_data = array("B", file.read())
+        images = []
+        for i in range(size):
+            images.append([0] * rows * cols)
+        for i in range(size):
+            img = np.array(image_data[i * rows * cols:(i + 1) * rows * cols])
+            img = img.reshape(28, 28)
+            images[i] = img
+
+        return images, labels
