@@ -34,10 +34,9 @@ class MnistDataset(Dataset):
 
     def __getitem__(self, index):
         image = cv2.cvtColor(self.images[index], cv2.COLOR_GRAY2RGB)
-        # image = torch.from_numpy(np.transpose(image, (2, 0, 1))).float()
         image = self.augs(image)
         label = self.labels[index]
-        batch = {'image': image,
+        batch = {'input': image,
                  'label': torch.tensor(label).long()}
         return batch
 
