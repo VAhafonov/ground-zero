@@ -22,7 +22,6 @@ class MnistDataset(Dataset):
         self.load()
         self.augs = transforms.Compose([
             transforms.ToTensor(),
-            transforms.RandomHorizontalFlip(),
             transforms.Resize((224, 224))]
         )
 
@@ -63,3 +62,12 @@ class MnistDataset(Dataset):
             images[i] = img
 
         return images, labels
+
+def visualise_sample(input_batch, output_batch):
+    input_img = input_batch['input'].clone()[0].cpu()
+    output = np.argmax(output_batch.clone()[0].cpu().numpy())
+    input_img = (input_img.permute(1, 2, 0).numpy() * 255).astype(np.uint8)
+    output_img = np.zeros((input_img.shape[0], input_img.shape[1] * 2, 3), dtype=np.uint8)
+    output_img[:, :input_img.shape[1], :] = input_img
+    cv2.putText(output_img, str(output), (int(input_img.shape[1] * 1.2), int(input_img.shape[0] * 0.8)), cv2.FONT_HERSHEY_SIMPLEX, 6, (255, 255, 255), 3)
+    return output_img
