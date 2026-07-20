@@ -30,10 +30,10 @@ class ResidualBlock(nn.Module):
 class Bottleneck(nn.Module):
     def __init__(self, in_channels: int, out_channels: int | None = None, stride=1, inner_channels = None):
         super(Bottleneck, self).__init__()
-        if inner_channels is None:
-            inner_channels = in_channels // 4
         if out_channels is None:
-            out_channels = in_channels * 4
+            out_channels = in_channels
+        if inner_channels is None:
+            inner_channels = out_channels // 4
         self.proj_in = nn.Sequential(
             nn.Conv2d(in_channels, inner_channels, kernel_size=1, stride=stride, bias=False),
             nn.BatchNorm2d(inner_channels),
