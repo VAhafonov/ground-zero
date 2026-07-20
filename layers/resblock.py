@@ -2,9 +2,10 @@ from torch import nn
 
 
 class ResidualBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, stride=1):
+    def __init__(self, in_channels: int, out_channels: int | None = None, stride=1):
         super(ResidualBlock, self).__init__()
-        self.stride = stride
+        if out_channels is None:
+            out_channels = in_channels
         self.block = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False),
             nn.BatchNorm2d(out_channels),
@@ -27,9 +28,12 @@ class ResidualBlock(nn.Module):
         return self.last_relu(out + x)
 
 class Bottleneck(nn.Module):
-    def __init__(self, in_channels, inner_channels, out_channels, stride=1):
+    def __init__(self, in_channels: int, out_channels: int | None = None, stride=1, inner_channels = None):
         super(Bottleneck, self).__init__()
-        self.stride = stride
+        if inner_channels is None:
+            inner_channels = in_channels // 4
+        if out_channels is None:
+            out_channels = in_channels * 4
         self.proj_in = nn.Sequential(
             nn.Conv2d(in_channels, inner_channels, kernel_size=1, stride=stride, bias=False),
             nn.BatchNorm2d(inner_channels),
