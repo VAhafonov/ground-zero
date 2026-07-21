@@ -13,6 +13,17 @@ TEST_IMAGES_FILENAME = 't10k-images.idx3-ubyte'
 TRAIN_LABELS_FILENAME = 'train-labels.idx1-ubyte'
 TEST_LABELS_FILENAME = 't10k-labels.idx1-ubyte'
 
+
+def visualise_sample(input_batch, output_batch):
+    input_img = input_batch['input'].clone()[0].cpu()
+    output = np.argmax(output_batch.clone()[0].cpu().numpy())
+    input_img = (input_img.permute(1, 2, 0).numpy() * 255).astype(np.uint8)
+    output_img = np.zeros((input_img.shape[0], input_img.shape[1] * 2, 3), dtype=np.uint8)
+    output_img[:, :input_img.shape[1], :] = input_img
+    cv2.putText(output_img, str(output), (int(input_img.shape[1] * 1.2), int(input_img.shape[0] * 0.8)), cv2.FONT_HERSHEY_SIMPLEX, 6, (255, 255, 255), 3)
+    return output_img
+
+
 class MnistDataset(Dataset):
     def __init__(self, root_dir: str, is_train: bool):
         self.images = []
@@ -66,11 +77,6 @@ class MnistDataset(Dataset):
 
         return images, labels
 
-def visualise_sample(input_batch, output_batch):
-    input_img = input_batch['input'].clone()[0].cpu()
-    output = np.argmax(output_batch.clone()[0].cpu().numpy())
-    input_img = (input_img.permute(1, 2, 0).numpy() * 255).astype(np.uint8)
-    output_img = np.zeros((input_img.shape[0], input_img.shape[1] * 2, 3), dtype=np.uint8)
-    output_img[:, :input_img.shape[1], :] = input_img
-    cv2.putText(output_img, str(output), (int(input_img.shape[1] * 1.2), int(input_img.shape[0] * 0.8)), cv2.FONT_HERSHEY_SIMPLEX, 6, (255, 255, 255), 3)
-    return output_img
+    @staticmethod
+    def get_vis_sample_func():
+        return visualise_sample
