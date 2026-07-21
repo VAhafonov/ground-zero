@@ -28,7 +28,8 @@ class ResidualBlock(nn.Module):
         return self.last_relu(out + x)
 
 class Bottleneck(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int | None = None, stride=1, inner_channels = None):
+    def __init__(self, in_channels: int, out_channels: int | None = None, stride=1, inner_channels = None,
+                 activation = nn.ReLU(inplace=True)):
         super(Bottleneck, self).__init__()
         if out_channels is None:
             out_channels = in_channels
@@ -37,12 +38,12 @@ class Bottleneck(nn.Module):
         self.proj_in = nn.Sequential(
             nn.Conv2d(in_channels, inner_channels, kernel_size=1, stride=stride, bias=False),
             nn.BatchNorm2d(inner_channels),
-            nn.ReLU(inplace=True),
+            activation
         )
         self.process_block = nn.Sequential(
             nn.Conv2d(inner_channels, inner_channels, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(inner_channels),
-            nn.ReLU(inplace=True),
+            activation
         )
         self.proj_out = nn.Sequential(
             nn.Conv2d(inner_channels, out_channels, kernel_size=1, stride=1, bias=False),
@@ -55,7 +56,7 @@ class Bottleneck(nn.Module):
             )
         else:
             self.shortcut = nn.Identity()
-        self.last_relu = nn.ReLU(inplace=True)
+        self.last_relu = activation
 
     def forward(self, x):
         out = self.proj_in(x)
@@ -63,3 +64,27 @@ class Bottleneck(nn.Module):
         out = self.proj_out(out)
         x = self.shortcut(x)
         return self.last_relu(out + x)
+
+class DarknetResidualBlock(nn.Module):
+    def __init__(self, in_channels: int, out_channels: int | None = None, inner_channels: int | None = None,
+                 activation = nn.LeakyReLU(inplace=True, negative_slope=0.1)):
+        super(DarknetResidualBlock, self).__init__()
+        if out_channels is None:
+            out_channels = in_channels
+        if inner_channels is None:
+            inner_channels = out_channels // 2
+        self.proj_in = nn.Sequential(
+            nn.Conv2d(in_channels, inner_channels, kernel_size=1, stride=1, bias=False),
+            nn.BatchNorm2d(inner_channels),
+            activation
+        )
+        self.proj_out = nn.Sequential(
+            nn.Conv2d(inner_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(out_channels),
+            activation
+        )
+
+    def forward(self, x):
+        out = self.proj_in(x)
+        out = self.proj_out(out)
+        return out + x
