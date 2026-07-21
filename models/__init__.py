@@ -6,7 +6,7 @@ class ModelFactory:
 
     @staticmethod
     def get_model(cfg):
-        if cfg.get('model') == 'resnet':
+        if cfg.get('type') == 'resnet':
             version = cfg.get('version', '18')
             num_classes = cfg.get('num_classes', 10)
             return Resnet(version, num_classes)
