@@ -1,6 +1,11 @@
 import torch.nn as nn
 from layers.resblock import ResidualBlock, Bottleneck
 
+"""
+ResNet implemented in PyTorch. Based on:
+https://arxiv.org/pdf/1512.03385
+"""
+
 class Resnet(nn.Module):
     def __init__(self, version: str, num_classes=10):
         super(Resnet, self).__init__()
