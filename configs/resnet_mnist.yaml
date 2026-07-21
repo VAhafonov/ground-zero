@@ -1,1 +1,26 @@
--placeholder
+model:
+  type: 'resnet'
+  version: '18'
+
+dataset:
+  type: 'mnist'
+  params:
+    root_dir: 'data/mnist'
+
+train:
+  batch_size: 32
+  epochs: 10
+  num_workers: 4
+
+optimizer:
+  type: 'SGD'
+  lr: 0.003
+  momentum: 0.9
+
+loss:
+  type: 'CrossEntropyLoss'
+
+accuracy:
+  type: 'MulticlassAccuracy'
+  num_classes: 10
+  top_k: 1
