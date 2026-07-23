@@ -7,8 +7,9 @@ from layers.resblock import DarknetResidualBlock
 
 """
 Yolo paper: https://arxiv.org/pdf/1506.02640
-Yolov2 paper: https://arxiv.org/pdf/1612.08242
+Yolov2 paper - anchor box introduction in yolo: https://arxiv.org/pdf/1612.08242
 Yolov3 paper: https://arxiv.org/pdf/1804.02767
+Anchor box introduction - Faster R-CNN https://arxiv.org/pdf/1506.01497
 """
 
 
